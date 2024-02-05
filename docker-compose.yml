@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  pricing_service:
+    build:
+      context: ./pricing_service
+    ports:
+      - "8001:8001"
+    env_file:
+      - .env
+
+  ranking_service:
+    build:
+      context: ./ranking_service
+    ports:
+      - "8002:8002"
+    env_file:
+      - .env
+
+  http_api_service:
+    build:
+      context: ./http_api_service
+    ports:
+      - "8003:8003"
+    env_file:
+      - .env
