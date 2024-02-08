@@ -17,6 +17,6 @@ import worker.tasks
 app.conf.beat_schedule = {
     'collect_rankings_every_2_minutes': {
         'task': 'worker.tasks.collect_and_merge_data',
-        'schedule': 60.0,
+        'schedule': 120.0,
     },
 }
