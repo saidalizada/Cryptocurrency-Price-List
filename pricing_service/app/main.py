@@ -8,20 +8,19 @@ app = FastAPI()
 
 prices_cache = TTLCache(maxsize=1000, ttl=60)
 
-async def get_cached_pricing_data(limit: int, timestamp: int) -> dict:
-    key = (limit, timestamp)
-    if key in prices_cache:
+async def get_cached_pricing_data(limit: int) -> dict:
+    if limit in prices_cache:
         print("catching")
-        return prices_cache[key]
-    new_data = await get_pricing_data(limit, timestamp)
-    prices_cache[key] = new_data
+        return prices_cache[limit]
+    new_data = await get_pricing_data(limit)
+    prices_cache[limit] = new_data
     return new_data
 
 @app.get("/crypto-prices/", response_model=CryptoPriceList)
-async def get_crypto_prices(limit: int = Query(default=10, description="Number of results to return"), timestamp: int = None):
+async def get_crypto_prices(limit: int = Query(default=10, description="Get the current USD prices.")):
     try:
         # Use the cached data if available, otherwise fetch new data
-        pricing_data = await get_cached_pricing_data(limit, timestamp)
+        pricing_data = await get_cached_pricing_data(limit)
         prices_list = []
 
         for crypto in pricing_data.get("data", []):

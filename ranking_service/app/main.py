@@ -16,7 +16,7 @@ async def get_cached_ranking_data(limit: int) -> list:
     return new_data
 
 @app.get("/crypto-ranks/", response_model=CryptoRankList)
-async def get_crypto_ranks(limit: int = Query(default=10, description="Number of results to return")):
+async def get_crypto_ranks(limit: int = Query(default=10, description="Get the current ranking information")):
     try:
         # Use the cached data if available, otherwise fetch new data
         ranking_data = await get_cached_ranking_data(limit)

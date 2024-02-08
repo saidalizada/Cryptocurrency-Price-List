@@ -1,0 +1,9 @@
+celery
+redis
+requests
+sqlalchemy
+requests
+requests-mock
+python-dotenv
+psycopg2
+pytest

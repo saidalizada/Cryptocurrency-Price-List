@@ -1,26 +1,72 @@
 version: "3.8"
-
 services:
   pricing_service:
     build:
+      dockerfile: ../docker_files/Dockerfile_fastapi
       context: ./pricing_service
     ports:
       - "8001:8001"
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8001
     env_file:
       - .env
-
   ranking_service:
     build:
+      dockerfile: ../docker_files/Dockerfile_fastapi
       context: ./ranking_service
     ports:
       - "8002:8002"
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8002
     env_file:
       - .env
-
   http_api_service:
     build:
+      dockerfile: ../docker_files/Dockerfile_fastapi
       context: ./http_api_service
     ports:
       - "8003:8003"
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8003
     env_file:
       - .env
+    depends_on:
+      - postgres
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: crypto_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+      - ./postgres_init_files:/docker-entrypoint-initdb.d
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+  celery_worker:
+    build:
+      dockerfile: ../docker_files/Dockerfile_celery
+      context: ./data_collectin_service
+    command: celery -A worker.celeryconfig worker --loglevel=INFO
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - postgres
+  celery_beat:
+    build:
+      dockerfile: ../docker_files/Dockerfile_celery
+      context: ./data_collectin_service
+    command: celery -A worker.celeryconfig beat --loglevel=INFO
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - celery_worker
+      - postgres
+volumes:
+  postgres_data:
